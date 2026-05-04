@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Команда — EsporTal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); margin-bottom:16px; }
+    .breadcrumb a { color:var(--text-secondary); }
+    .breadcrumb a:hover { color:var(--accent); }
+
+    .team-hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .team-hero-logo {
+      width: 100px; height: 100px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 52px;
+      flex-shrink: 0;
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+    .team-hero-info { flex: 1; position: relative; }
+    .team-hero-badges { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .team-hero-title { font-size:28px; font-weight:800; color:var(--text-primary); margin-bottom:4px; }
+    .team-hero-fullname { font-size:14px; color:var(--text-secondary); margin-bottom:14px; }
+    .team-hero-stats {
+      display: flex; gap: 24px; flex-wrap: wrap;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-value { font-size:20px; font-weight:800; color:var(--accent); line-height:1.2; }
+    .hero-stat-label { font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    .player-table { width:100%; border-collapse:collapse; }
+    .player-table th {
+      background:var(--bg-secondary); padding:10px 14px;
+      text-align:left; font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-secondary); border-bottom:1px solid var(--border);
+    }
+    .player-table td {
+      padding:11px 14px; font-size:13px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      color:var(--text-primary); vertical-align:middle;
+    }
+    .player-table tr:last-child td { border-bottom:none; }
+    .player-table tr:hover td { background:var(--bg-card-hover); }
+    .player-nick { font-weight:700; font-size:14px; }
+    .player-fullname { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+
+    .role-badge {
+      display:inline-block; padding:2px 8px;
+      background:var(--bg-secondary); border:1px solid var(--border);
+      border-radius:10px; font-size:11px; font-weight:600;
+      color:var(--text-secondary);
+    }
+    .role-badge.igl { background:var(--accent-dim); color:var(--accent); border-color:transparent; }
+    .role-badge.awp { background:var(--blue-dim); color:var(--blue); border-color:transparent; }
+
+    .mgmt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      padding: 16px 0;
+    }
+    .mgmt-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .mgmt-icon { font-size: 28px; margin-bottom: 10px; }
+    .mgmt-role { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); margin-bottom:6px; }
+    .mgmt-name { font-size:14px; font-weight:600; color:var(--text-primary); }
+
+    .results-table { width:100%; border-collapse:collapse; }
+    .results-table th {
+      background:var(--bg-secondary); padding:10px 14px;
+      text-align:left; font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:var(--text-secondary); border-bottom:1px solid var(--border);
+    }
+    .results-table td {
+      padding:11px 14px; font-size:13px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .results-table tr:last-child td { border-bottom:none; }
+    .results-table tr:hover td { background:var(--bg-card-hover); }
+    .place-badge {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:32px; height:32px; border-radius:50%;
+      font-size:13px; font-weight:800;
+      background:var(--bg-secondary); color:var(--text-secondary);
+    }
+    .place-badge.gold   { background:rgba(245,166,35,0.15); color:#f5a623; }
+    .place-badge.silver { background:rgba(170,170,170,0.15); color:#aaa; }
+    .place-badge.bronze { background:rgba(205,127,50,0.15);  color:#cd7f32; }
+
+    .empty-state {
+      text-align:center; padding:40px 20px;
+      color:var(--text-secondary); font-size:13px;
+    }
+    .empty-state-icon { font-size:36px; margin-bottom:10px; }
+
+    .country-flag { border-radius:3px; vertical-align:middle; }
+  </style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <nav class="top-nav" id="top-nav"></nav>
+    <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+  </div>
+</header>
+
+<div class="game-tabs-bar"><div class="game-tabs-inner" id="game-tabs"></div></div>
+
+<div class="page-wrapper no-sidebar">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">ℹ️ Об организации</div>
+      <table class="info-table" id="org-info-table"></table>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <div class="breadcrumb">
+      <a href="teams.html">Команды</a>
+      <span>›</span>
+      <span id="breadcrumb-name">Команда</span>
+    </div>
+
+    <!-- HERO -->
+    <div class="team-hero" id="team-hero">
+      <div class="team-hero-logo" id="hero-logo">?</div>
+      <div class="team-hero-info">
+        <div class="team-hero-badges" id="hero-badges"></div>
+        <div class="team-hero-title" id="hero-title">—</div>
+        <div class="team-hero-fullname" id="hero-fullname"></div>
+        <div class="team-hero-stats" id="hero-stats"></div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" style="margin-bottom:16px">
+      <button class="tab-btn active" data-tab="roster">👥 Состав</button>
+      <button class="tab-btn" data-tab="management">🏢 Менеджмент</button>
+      <button class="tab-btn" data-tab="former">📜 Бывшие игроки</button>
+      <button class="tab-btn" data-tab="results">🏆 Результаты</button>
+    </div>
+
+    <!-- TAB: Состав -->
+    <div class="tab-content active" id="tab-roster">
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-title">👥 Текущий состав</div>
+        <div id="roster-table"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Менеджмент -->
+    <div class="tab-content" id="tab-management">
+      <div class="sidebar-widget" style="padding:4px 0">
+        <div class="sidebar-widget-title">🏢 Руководство и тренерский штаб</div>
+        <div class="mgmt-grid" id="mgmt-grid" style="padding:16px"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Бывшие игроки -->
+    <div class="tab-content" id="tab-former">
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-title">📜 Бывшие игроки</div>
+        <div id="former-table"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Результаты -->
+    <div class="tab-content" id="tab-results">
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-title">🏆 Результаты на турнирах</div>
+        <table class="results-table" id="results-table"></table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 EsporTal</span></div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('teams');
+  initTopNav('teams');
+
+  // ---- URL params ----
+  const params  = new URLSearchParams(location.search);
+  const pName   = decodeURIComponent(params.get('name') || '');
+  const pGame   = params.get('game') || '';
+
+  const team    = TEAMS.find(t => t.name === pName && t.game === pGame)
+               || TEAMS.find(t => t.name === pName);
+  const details = TEAM_DETAILS?.[`${pName}|${pGame}`]
+               || TEAM_DETAILS?.[pName]
+               || {};
+  const roster  = ROSTERS[`${pName}|${pGame}`] || ROSTERS[pName] || [];
+  const gameObj = GAMES.find(g => g.id === (team?.game || pGame));
+
+  document.title = `${pName} — EsporTal`;
+  document.getElementById('breadcrumb-name').textContent = pName;
+
+  // ---- helpers ----
+  function flag(code, size = 20, display = null) {
+    if (!code) return '';
+    const w = display || size;
+    return `<img src="https://flagcdn.com/w${size}/${code.toLowerCase()}.png"
+      width="${w}"
+      class="country-flag" alt="${code}" title="${code}">`;
+  }
+
+  function fmtMoney(n) {
+    if (!n) return '—';
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'М';
+    if (n >= 1000)    return '$' + Math.round(n / 1000) + 'К';
+    return '$' + n;
+  }
+
+  function roleBadge(role) {
+    const lower = (role || '').toLowerCase();
+    const cls = lower.includes('igl') ? 'igl' : lower.includes('awp') ? 'awp' : '';
+    return `<span class="role-badge ${cls}">${role}</span>`;
+  }
+
+  function placeBadge(place) {
+    const cls = place === '1' ? 'gold' : place === '2' ? 'silver' : place === '3' || place === '3-4' ? 'bronze' : '';
+    return `<span class="place-badge ${cls}">${place}</span>`;
+  }
+
+  // ---- HERO ----
+  if (team) {
+    document.getElementById('hero-logo').innerHTML = team.logo;
+
+    const badgesEl = document.getElementById('hero-badges');
+    if (gameObj) {
+      badgesEl.innerHTML = `
+        <span style="background:${gameObj.color}22;color:${gameObj.color};
+          padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">
+          ${gameObj.icon} ${gameObj.name}
+        </span>
+        <span style="background:var(--bg-secondary);border:1px solid var(--border);
+          padding:3px 10px;border-radius:12px;font-size:12px;color:var(--text-secondary)">
+          🌍 ${team.region}
+        </span>
+        ${details.country ? `<span style="display:inline-flex;align-items:center;gap:5px;
+          background:var(--bg-secondary);border:1px solid var(--border);
+          padding:3px 10px;border-radius:12px;font-size:12px;color:var(--text-secondary)">
+          ${flag(details.country, 20)} ${details.countryName || details.country}
+        </span>` : ''}
+        ${details.founded ? `<span style="background:var(--bg-secondary);border:1px solid var(--border);
+          padding:3px 10px;border-radius:12px;font-size:12px;color:var(--text-secondary)">
+          📅 с ${details.founded}
+        </span>` : ''}`;
+    }
+
+    document.getElementById('hero-title').textContent = pName;
+    if (details.fullName && details.fullName !== pName) {
+      document.getElementById('hero-fullname').textContent = details.fullName;
+    }
+
+    const statsEl = document.getElementById('hero-stats');
+    statsEl.innerHTML = `
+      <div class="hero-stat">
+        <div class="hero-stat-value">#${team.ranking}</div>
+        <div class="hero-stat-label">Рейтинг</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">${team.wins}</div>
+        <div class="hero-stat-label">Побед</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">${team.losses}</div>
+        <div class="hero-stat-label">Поражений</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">${team.winrate}%</div>
+        <div class="hero-stat-label">Winrate</div>
+      </div>
+      ${details.totalEarnings ? `<div class="hero-stat">
+        <div class="hero-stat-value">${fmtMoney(details.totalEarnings)}</div>
+        <div class="hero-stat-label">Заработано</div>
+      </div>` : ''}`;
+  }
+
+  // ---- ORG INFO (sidebar) ----
+  const infoRows = [
+    details.country    ? ['🏳️ Страна',    `${flag(details.country, 20)} ${details.countryName || details.country}`] : null,
+    details.founded    ? ['📅 Основана',   details.founded] : null,
+    gameObj            ? ['🎮 Игра',       `${gameObj.icon} ${gameObj.name}`] : null,
+    team               ? ['📊 Рейтинг',    `#${team.ranking}`] : null,
+    details.owner      ? ['👑 Владелец',   details.owner] : null,
+    details.ceo        ? ['💼 CEO',        details.ceo] : null,
+    details.manager    ? ['🗂️ Менеджер',   details.manager] : null,
+    details.coach      ? ['🧠 Тренер',     details.coach] : null,
+  ].filter(Boolean);
+
+  const infoTable = document.getElementById('org-info-table');
+  infoTable.innerHTML = infoRows.map(([k, v]) => `
+    <tr>
+      <th>${k}</th>
+      <td>${v}</td>
+    </tr>`).join('');
+
+  // ---- ROSTER TAB ----
+  const rosterTable = document.getElementById('roster-table');
+  if (roster.length) {
+    rosterTable.innerHTML = roster.map(p => `
+      <div class="roster-player-row">
+        ${flag(p.country, 20)}
+        <div style="flex:1;min-width:0">
+          <div class="roster-player-nick">${p.nick}</div>
+          <div class="roster-player-name">${p.name}</div>
+        </div>
+        <span class="roster-player-role">${roleBadge(p.role)}</span>
+      </div>`).join('');
+  } else {
+    rosterTable.innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div>Состав не указан</div>`;
+  }
+
+  // ---- MANAGEMENT TAB ----
+  const mgmtGrid = document.getElementById('mgmt-grid');
+  const staff = [
+    details.owner   ? { icon: '👑', role: 'Владелец',  name: details.owner }   : null,
+    details.ceo     ? { icon: '💼', role: 'CEO',        name: details.ceo }     : null,
+    details.manager ? { icon: '🗂️', role: 'Менеджер',  name: details.manager } : null,
+    details.coach   ? { icon: '🧠', role: 'Тренер',    name: details.coach }   : null,
+  ].filter(Boolean);
+
+  if (staff.length) {
+    mgmtGrid.innerHTML = staff.map(s => `
+      <div class="mgmt-card">
+        <div class="mgmt-icon">${s.icon}</div>
+        <div class="mgmt-role">${s.role}</div>
+        <div class="mgmt-name">${s.name}</div>
+      </div>`).join('');
+  } else {
+    mgmtGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-icon">🏢</div>Данные не указаны</div>`;
+  }
+
+  // ---- FORMER PLAYERS TAB ----
+  const formerTable = document.getElementById('former-table');
+  const former = details.former || [];
+  if (former.length) {
+    formerTable.innerHTML = former.map(p => `
+      <div class="roster-player-row">
+        ${flag(p.country, 20)}
+        <div style="flex:1;min-width:0">
+          <div class="roster-player-nick">${p.nick}</div>
+          <div class="roster-player-name">${p.name}</div>
+        </div>
+        <span style="color:var(--text-secondary);font-size:12px;flex-shrink:0">${p.years}</span>
+        <span class="roster-player-role">${roleBadge(p.role)}</span>
+      </div>`).join('');
+  } else {
+    formerTable.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📜</div>Данные не указаны</div>`;
+  }
+
+  // ---- RESULTS TAB ----
+  const resultsTable = document.getElementById('results-table');
+  const results = details.results || [];
+  if (results.length) {
+    resultsTable.innerHTML = `
+      <thead><tr>
+        <th style="width:50px;text-align:center">Место</th>
+        <th>Турнир</th>
+        <th>Приз</th>
+        <th>Дата</th>
+      </tr></thead>`;
+    const tbody = document.createElement('tbody');
+    results.forEach(r => {
+      const [year, month] = (r.date || '').split('-');
+      const monthNames = ['','Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+      const dateStr = month ? `${monthNames[+month] || month} ${year}` : year;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align:center">${placeBadge(r.place)}</td>
+        <td style="font-weight:600">${r.tournament}</td>
+        <td style="color:var(--accent);font-weight:700">${r.prize}</td>
+        <td style="color:var(--text-secondary);font-size:12px">${dateStr}</td>`;
+      tbody.appendChild(tr);
+    });
+    resultsTable.appendChild(tbody);
+  } else {
+    resultsTable.innerHTML = `<tr><td colspan="4">
+      <div class="empty-state"><div class="empty-state-icon">🏆</div>Данные не указаны</div>
+    </td></tr>`;
+  }
+
+  // ---- TABS ----
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

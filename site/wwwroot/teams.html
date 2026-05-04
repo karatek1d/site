@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Команды — EsporTal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .team-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      color: inherit;
+    }
+    .team-card-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: transparent;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      border: none;
+    }
+    .team-card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .team-card-game {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .team-card-stats {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .team-stat { text-align: center; }
+    .team-stat-val { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .team-stat-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+    .teams-grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .rank-medal { font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <nav class="top-nav" id="top-nav"></nav>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+    </div>
+  </div>
+</header>
+
+<div class="game-tabs-bar">
+  <div class="game-tabs-inner" id="game-tabs"></div>
+</div>
+
+<div class="page-wrapper no-sidebar">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🌍 Регионы</div>
+      <a class="sidebar-nav-item" href="#" data-region="all"><span class="icon">🌐</span>Все регионы</a>
+      <a class="sidebar-nav-item" href="#" data-region="EU"><span class="icon">🇪🇺</span>Европа</a>
+      <a class="sidebar-nav-item" href="#" data-region="CIS"><span class="icon">🌐</span>СНГ</a>
+      <a class="sidebar-nav-item" href="#" data-region="NA"><span class="icon">🇺🇸</span>Северная Америка</a>
+      <a class="sidebar-nav-item" href="#" data-region="Korea"><span class="icon">🇰🇷</span>Корея / Азия</a>
+      <a class="sidebar-nav-item" href="#" data-region="EMEA"><span class="icon">🌍</span>EMEA</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="section-header">
+      <div class="section-title">Команды</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="teams-count" class="text-muted text-sm"></span>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Игра:</span>
+        <select class="filter-select" id="filter-game">
+          <option value="all">Все игры</option>
+          <option value="cs2">CS2</option>
+          <option value="dota2">Dota 2</option>
+          <option value="lol">League of Legends</option>
+          <option value="valorant">Valorant</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Регион:</span>
+        <select class="filter-select" id="filter-region">
+          <option value="all">Все регионы</option>
+          <option value="EU">Европа</option>
+          <option value="CIS">СНГ</option>
+          <option value="NA">Северная Америка</option>
+          <option value="Korea">Корея</option>
+          <option value="EMEA">EMEA</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Сортировка:</span>
+        <select class="filter-select" id="filter-sort">
+          <option value="rank">По рейтингу</option>
+          <option value="wins">По победам</option>
+          <option value="winrate">По винрейту</option>
+          <option value="name">По алфавиту</option>
+        </select>
+      </div>
+      <div class="view-toggle" style="margin-left:auto">
+        <button class="view-btn active" data-view="grid">▦ Сетка</button>
+        <button class="view-btn" data-view="table">☰ Таблица</button>
+      </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div id="teams-grid" class="teams-grid-view"></div>
+
+    <!-- TABLE VIEW -->
+    <div id="teams-table-wrap" style="display:none">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Команда</th>
+            <th>Игра</th>
+            <th>Регион</th>
+            <th colspan="3">Ссылка</th>
+          </tr>
+        </thead>
+        <tbody id="teams-tbody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Игры</div>
+      <div class="footer-links">
+        <a href="tournaments.html?game=cs2">Counter-Strike 2</a>
+        <a href="tournaments.html?game=dota2">Dota 2</a>
+        <a href="tournaments.html?game=lol">League of Legends</a>
+        <a href="tournaments.html?game=valorant">Valorant</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">О проекте</div>
+      <div class="footer-links">
+        <a href="#">О нас</a>
+        <a href="#">API</a>
+        <a href="#">Контакты</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EsporTal</span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('teams');
+  initTopNav('teams');
+
+  let currentView = 'grid';
+  let _apiTeams = [];
+
+  // ---- Roster tooltip ----
+  const _tt = document.createElement('div');
+  _tt.className = 'roster-tooltip';
+  document.body.appendChild(_tt);
+  let _ttTimer = null;
+
+  function _flag(code, size = 20) {
+    return `<img src="https://flagcdn.com/w${size}/${code.toLowerCase()}.png"
+      width="${size}" height="${Math.round(size*0.67)}" alt="${code}"
+      style="border-radius:2px;vertical-align:middle;flex-shrink:0">`;
+  }
+
+  function _getRoster(name, game) {
+    return ROSTERS[name + '|' + game] || ROSTERS[name] || [];
+  }
+
+  function _showRosterTooltip(el, team) {
+    clearTimeout(_ttTimer);
+    const roster = _getRoster(team.name, team.game);
+    const gameObj = GAMES.find(g => g.id === team.game);
+    const logo = team._fallback?.logo || team.logo || '?';
+    const flags = [...new Set(roster.map(p => p.country))].map(c => _flag(c, 16)).join(' ');
+
+    _tt.innerHTML = `
+      <div class="roster-tooltip-header">
+        <div class="roster-tooltip-logo">${logo}</div>
+        <div>
+          <div class="roster-tooltip-team">${team.name}</div>
+          <div class="roster-tooltip-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="color:${gameObj?.color||'var(--text-secondary)'}">${gameObj?.icon||''} ${gameObj?.name||team.game}</span>
+            <span style="color:var(--border-light)">·</span>
+            <span>${team.region}</span>
+            ${flags ? `<span style="color:var(--border-light)">·</span>${flags}` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="roster-tooltip-players">
+        ${roster.length ? roster.map(p => `
+          <div class="roster-player-row">
+            ${_flag(p.country, 20)}
+            <div style="flex:1;min-width:0">
+              <div class="roster-player-nick">${p.nick}</div>
+              <div class="roster-player-name">${p.name}</div>
+            </div>
+            <span class="roster-player-role">${p.role}</span>
+          </div>`).join('') : `
+          <div style="padding:14px;text-align:center;color:var(--text-secondary);font-size:12px">Состав не указан</div>`}
+      </div>
+      <div class="roster-tooltip-footer">👥 ${roster.length} игрок${roster.length===1?'':roster.length<5?'а':'ов'} · Актуальный состав</div>`;
+
+    const rect = el.getBoundingClientRect();
+    const ttW = 280;
+    const ttH = _tt.offsetHeight || 260;
+    let left = rect.right + 12;
+    let top  = rect.top;
+    if (left + ttW > window.innerWidth - 12) left = rect.left - ttW - 12;
+    const maxTop = window.innerHeight - ttH - 12;
+    if (top > maxTop) top = maxTop;
+    if (top < 8) top = 8;
+    _tt.style.left = left + 'px';
+    _tt.style.top  = top + 'px';
+    _tt.classList.add('visible');
+  }
+
+  function _hideRosterTooltip() {
+    _ttTimer = setTimeout(() => _tt.classList.remove('visible'), 120);
+  }
+
+  // Лого: реальный URL из API или fallback HTML из data.js
+  function renderLogo(apiTeam) {
+    if (apiTeam?.logoUrl) {
+      return `<img src="${apiTeam.logoUrl}" alt="${apiTeam.name}"
+               style="width:100%;height:100%;object-fit:contain;display:block"
+               onerror="this.replaceWith(document.createTextNode('?'))">`;
+    }
+    // fallback на статические данные data.js
+    const fallback = TEAMS.find(t => t.name === apiTeam?.name && t.game === apiTeam?.game);
+    return fallback?.logo || '?';
+  }
+
+  function getFiltered() {
+    // Используем API-данные если загружены, иначе data.js
+    let list = _apiTeams.length ? _apiTeams : TEAMS.map(t => ({
+      name: t.name, game: t.game, region: t.region,
+      ranking: t.ranking, logoUrl: null,
+      _fallback: t
+    }));
+
+    const game   = document.getElementById('filter-game').value;
+    const region = document.getElementById('filter-region').value;
+    const sort   = document.getElementById('filter-sort').value;
+
+    if (game   !== 'all') list = list.filter(t => t.game   === game);
+    if (region !== 'all') list = list.filter(t => t.region === region);
+
+    if      (sort === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+    else                      list.sort((a,b) => a.ranking - b.ranking);
+
+    return list;
+  }
+
+  function render() {
+    const list = getFiltered();
+    document.getElementById('teams-count').textContent = `${list.length} команд`;
+
+    const gridEl  = document.getElementById('teams-grid');
+    const tbodyEl = document.getElementById('teams-tbody');
+    gridEl.innerHTML  = '';
+    tbodyEl.innerHTML = '';
+
+    list.forEach((team, idx) => {
+      const gameObj  = GAMES.find(g => g.id === team.game);
+      const medals   = ['🥇','🥈','🥉'];
+      const rankIcon = idx < 3 ? medals[idx] : `#${idx+1}`;
+      const logoHtml = renderLogo(team);
+      // Grid card
+      const card = document.createElement('a');
+      card.href = `team.html?name=${encodeURIComponent(team.name)}&game=${team.game}`;
+      card.className = 'team-card';
+      card.style.position = 'relative';
+      card.innerHTML = `
+        <div style="position:absolute;top:10px;right:10px;font-size:12px;font-weight:700;
+                    color:${idx<3?'var(--accent)':'var(--text-secondary)'}">${rankIcon}</div>
+        <div class="team-card-logo">${logoHtml}</div>
+        <div class="team-card-name">${team.name}</div>
+        <div class="team-card-game" style="color:${gameObj?.color||'var(--text-secondary)'}">
+          ${gameObj?.icon || ''} ${gameObj?.name || team.game} · ${team.region}
+        </div>`;
+      card.addEventListener('mouseenter', () => _showRosterTooltip(card, team));
+      card.addEventListener('mouseleave', _hideRosterTooltip);
+      gridEl.appendChild(card);
+
+      // Table row
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.onclick = () => location.href = `team.html?name=${encodeURIComponent(team.name)}&game=${team.game}`;
+      tr.innerHTML = `
+        <td style="font-weight:700;color:${idx<3?'var(--accent)':'var(--text-secondary)'}">${rankIcon}</td>
+        <td><div class="team-cell">
+          <div style="width:28px;height:28px;border-radius:5px;background:var(--bg-secondary);
+                      display:flex;align-items:center;justify-content:center;overflow:hidden">
+            ${logoHtml}
+          </div>
+          <span style="font-weight:600">${team.name}</span>
+        </div></td>
+        <td style="color:${gameObj?.color||'var(--text-secondary)'}">
+          ${gameObj?.icon || ''} ${gameObj?.name || team.game}</td>
+        <td>${team.region}</td>
+        <td colspan="3" style="color:var(--text-secondary);font-size:12px">—</td>`;
+      tr.addEventListener('mouseenter', () => _showRosterTooltip(tr, team));
+      tr.addEventListener('mouseleave', _hideRosterTooltip);
+      tbodyEl.appendChild(tr);
+    });
+  }
+
+  // View toggle
+  document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-btn[data-view]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      document.getElementById('teams-grid').style.display       = currentView === 'grid'  ? '' : 'none';
+      document.getElementById('teams-table-wrap').style.display = currentView === 'table' ? '' : 'none';
+    });
+  });
+
+  // Region sidebar filter
+  document.querySelectorAll('[data-region]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('filter-region').value = a.dataset.region;
+      render();
+    });
+  });
+
+  ['filter-game','filter-region','filter-sort'].forEach(id => {
+    document.getElementById(id).addEventListener('change', render);
+  });
+
+  // Показываем skeleton, потом загружаем реальные данные из Liquipedia
+  renderSkeleton('teams-grid', 12);
+  (async () => {
+    _apiTeams = await fetchTeams(
+      document.getElementById('filter-game').value !== 'all'
+        ? document.getElementById('filter-game').value
+        : null
+    );
+    render();
+  })();
+</script>
+</body>
+</html>

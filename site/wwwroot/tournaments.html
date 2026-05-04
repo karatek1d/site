@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Турниры — EsporTal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <nav class="top-nav" id="top-nav"></nav>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+    </div>
+  </div>
+</header>
+
+<div class="game-tabs-bar">
+  <div class="game-tabs-inner" id="game-tabs"></div>
+</div>
+
+<div class="page-wrapper no-sidebar">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🎮 Игры</div>
+      <div id="game-filter-nav"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📊 По регионам</div>
+      <a class="sidebar-nav-item" href="#" data-region="Global"><span class="icon">🌍</span>Мировые</a>
+      <a class="sidebar-nav-item" href="#" data-region="EU"><span class="icon">🇪🇺</span>Европа</a>
+      <a class="sidebar-nav-item" href="#" data-region="NA"><span class="icon">🇺🇸</span>Северная Америка</a>
+      <a class="sidebar-nav-item" href="#" data-region="CIS"><span class="icon">🌐</span>СНГ</a>
+      <a class="sidebar-nav-item" href="#" data-region="Korea"><span class="icon">🇰🇷</span>Азия</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div id="source-banner" class="alert alert-warning" style="display:none;margin-bottom:14px"></div>
+    <div class="section-header">
+      <div class="section-title">Все турниры</div>
+      <span id="tournaments-count" class="text-muted text-sm"></span>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Игра:</span>
+        <select class="filter-select" id="filter-game">
+          <option value="all">Все игры</option>
+          <option value="cs2">CS2</option>
+          <option value="dota2">Dota 2</option>
+          <option value="lol">League of Legends</option>
+          <option value="valorant">Valorant</option>
+          <option value="rl">Rocket League</option>
+          <option value="sc2">StarCraft II</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Статус:</span>
+        <select class="filter-select" id="filter-status">
+          <option value="all">Все</option>
+          <option value="live">Live</option>
+          <option value="upcoming">Предстоящие</option>
+          <option value="completed">Завершённые</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Тир:</span>
+        <select class="filter-select" id="filter-tier">
+          <option value="all">Все</option>
+          <option value="S">Tier S</option>
+          <option value="A">Tier A</option>
+          <option value="B">Tier B</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Сортировка:</span>
+        <select class="filter-select" id="filter-sort">
+          <option value="date">По дате</option>
+          <option value="prize">По призу</option>
+          <option value="tier">По тиру</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="resetFilters()">Сбросить</button>
+    </div>
+
+    <!-- STATUS TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" data-status="all">Все</button>
+      <button class="tab-btn" data-status="live">🔴 Live <span id="live-count"></span></button>
+      <button class="tab-btn" data-status="upcoming">↑ Предстоящие</button>
+      <button class="tab-btn" data-status="completed">✓ Завершённые</button>
+    </div>
+
+    <!-- RESULTS LIST -->
+    <div id="tournaments-list"></div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination"></div>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Игры</div>
+      <div class="footer-links">
+        <a href="tournaments.html?game=cs2">Counter-Strike 2</a>
+        <a href="tournaments.html?game=dota2">Dota 2</a>
+        <a href="tournaments.html?game=lol">League of Legends</a>
+        <a href="tournaments.html?game=valorant">Valorant</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">О проекте</div>
+      <div class="footer-links">
+        <a href="#">О нас</a>
+        <a href="#">API</a>
+        <a href="#">Контакты</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EsporTal</span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('tournaments');
+  initTopNav('tournaments');
+
+  // Game filter in sidebar
+  const gameFilterNav = document.getElementById('game-filter-nav');
+  GAMES.forEach(g => {
+    const a = document.createElement('a');
+    a.href = `?game=${g.id}`;
+    a.className = 'sidebar-nav-item';
+    a.innerHTML = `<span class="icon">${gameIconHtml(g, 16)}</span>${g.name}`;
+    gameFilterNav.appendChild(a);
+  });
+
+  // Get URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramGame = urlParams.get('game') || 'all';
+  const paramStatus = urlParams.get('status') || 'all';
+
+  if (paramGame !== 'all') document.getElementById('filter-game').value = paramGame;
+  if (paramStatus !== 'all') document.getElementById('filter-status').value = paramStatus;
+
+  let allTournamentsData = [];
+  let currentPage = 1;
+  const PER_PAGE = 9;
+  let activeStatusTab = paramStatus;
+
+  // Загрузка данных через API
+  async function loadTournaments() {
+    renderSkeleton('tournaments-list', 9, 'card');
+    allTournamentsData = await fetchTournaments();
+    const liveCount = allTournamentsData.filter(t => t.status === 'live').length;
+    document.getElementById('live-count').textContent = liveCount ? `(${liveCount})` : '';
+    render();
+  }
+
+  function getFiltered() {
+    let list = [...allTournamentsData];
+    const game = document.getElementById('filter-game').value;
+    const status = document.getElementById('filter-status').value;
+    const tier = document.getElementById('filter-tier').value;
+    const sort = document.getElementById('filter-sort').value;
+
+    if (game !== 'all') list = list.filter(t => t.game === game);
+    if (status !== 'all') list = list.filter(t => t.status === status);
+    else if (activeStatusTab !== 'all') list = list.filter(t => t.status === activeStatusTab);
+    if (tier !== 'all') list = list.filter(t => t.tier === tier);
+    const region = getActiveRegion();
+    if (region) list = list.filter(t => t.region && t.region.includes(region));
+
+    if (sort === 'prize') list.sort((a,b) => b.prizeNum - a.prizeNum);
+    else if (sort === 'tier') list.sort((a,b) => a.tier.localeCompare(b.tier));
+    else list.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+
+    return list;
+  }
+
+  function render() {
+    const list = getFiltered();
+    const total = list.length;
+    const paged = list.slice((currentPage-1)*PER_PAGE, currentPage*PER_PAGE);
+
+    document.getElementById('tournaments-count').textContent = `${total} турниров`;
+
+    const container = document.getElementById('tournaments-list');
+    container.innerHTML = '';
+
+    if (!paged.length) {
+      container.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-secondary)">
+        <div style="font-size:48px;margin-bottom:12px">🔍</div>
+        <div style="font-size:16px;font-weight:600">Турниры не найдены</div>
+        <div style="font-size:13px;margin-top:6px">Попробуйте изменить фильтры</div>
+      </div>`;
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'tournaments-grid';
+
+      paged.forEach(t => {
+        const game = GAMES.find(g => g.id === t.game);
+        const card = document.createElement('a');
+        card.href = `tournament.html?id=${t.id}`;
+        card.className = 'tournament-card';
+        card.innerHTML = `
+          <div class="tournament-card-header">
+            <div class="tournament-logo">${t.icon}</div>
+            <div class="tournament-card-title">
+              <div class="tournament-card-name">${t.name}</div>
+              <div class="tournament-card-game" style="color:${game?.color||'var(--text-secondary)'}; display:flex; align-items:center; gap:5px;">
+                ${gameIconHtml(game, 14)} ${game?.name}
+              </div>
+            </div>
+          </div>
+          <div class="tournament-card-body">
+            <div class="tournament-card-stat">
+              <span class="tournament-card-stat-label">📅 Дата</span>
+              <span class="tournament-card-stat-value">${formatDate(t.startDate)}</span>
+            </div>
+            <div class="tournament-card-stat">
+              <span class="tournament-card-stat-label">📍 Место</span>
+              <span class="tournament-card-stat-value">${t.location}</span>
+            </div>
+            <div class="tournament-card-stat">
+              <span class="tournament-card-stat-label">🏢 Организатор</span>
+              <span class="tournament-card-stat-value">${t.organizer}</span>
+            </div>
+            <div class="tournament-card-stat">
+              <span class="tournament-card-stat-label">👥 Команды</span>
+              <span class="tournament-card-stat-value">${t.teams}</span>
+            </div>
+          </div>
+          <div class="tournament-card-footer">
+            ${statusBadge(t.status)}
+            <div style="display:flex;align-items:center;gap:8px">
+              ${tierBadge(t.tier)}
+              <span style="color:var(--accent);font-weight:700;font-size:13px">${t.prize}</span>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+      container.appendChild(grid);
+    }
+
+    // Pagination
+    const pages = Math.ceil(total / PER_PAGE);
+    const pagEl = document.getElementById('pagination');
+    pagEl.innerHTML = '';
+    if (pages > 1) {
+      for (let i = 1; i <= pages; i++) {
+        const b = document.createElement('div');
+        b.className = 'page-btn' + (i === currentPage ? ' active' : '');
+        b.textContent = i;
+        b.onclick = () => { currentPage = i; render(); window.scrollTo(0,0); };
+        pagEl.appendChild(b);
+      }
+    }
+  }
+
+  // Status tabs
+  document.querySelectorAll('.tab-btn[data-status]').forEach(btn => {
+    if (btn.dataset.status === activeStatusTab) btn.classList.add('active');
+    else btn.classList.remove('active');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-status]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeStatusTab = btn.dataset.status;
+      currentPage = 1;
+      render();
+    });
+  });
+
+  // Filter changes
+  ['filter-game','filter-status','filter-tier','filter-sort'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { currentPage = 1; render(); });
+  });
+
+  function resetFilters() {
+    document.getElementById('filter-game').value = 'all';
+    document.getElementById('filter-status').value = 'all';
+    document.getElementById('filter-tier').value = 'all';
+    document.getElementById('filter-sort').value = 'date';
+    activeStatusTab = 'all';
+    document.querySelectorAll('.tab-btn[data-status]').forEach(b => {
+      b.classList.toggle('active', b.dataset.status === 'all');
+    });
+    document.querySelectorAll('[data-region]').forEach(el => el.classList.remove('active'));
+    currentPage = 1;
+    render();
+  }
+
+  // Region sidebar filter
+  document.querySelectorAll('[data-region]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('[data-region]').forEach(el => el.classList.remove('active'));
+      a.classList.add('active');
+      currentPage = 1;
+      render();
+    });
+  });
+
+  function getActiveRegion() {
+    const active = document.querySelector('[data-region].active');
+    return active ? active.dataset.region : null;
+  }
+
+  loadTournaments();
+</script>
+</body>
+</html>

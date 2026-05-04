@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <clipPath id="sq"><rect width="100" height="100" rx="14"/></clipPath>
+  <g clip-path="url(#sq)">
+    <!-- Yellow left half -->
+    <rect width="100" height="100" fill="#f5a800"/>
+    <!-- Blue right half (diagonal split) -->
+    <polygon points="55,0 100,0 100,100 40,100" fill="#1a3a8c"/>
+
+    <!-- C letter -->
+    <path d="M7,38 C7,27 14,21 25,21 L40,21 L36,31 L27,31 C23,31 20,34 20,38 L20,62 C20,66 23,69 27,69 L36,69 L40,79 L25,79 C14,79 7,73 7,62 Z"
+          fill="#fff" transform="skewX(-8)"/>
+
+    <!-- S letter -->
+    <path d="M60,21 L78,21 C86,21 90,26 90,34 L90,42 C90,48 86,52 78,55 L67,59 C64,60 62,62 62,65 L62,69 L80,69 L84,79 L60,79 C52,79 48,74 48,66 L48,59 C48,53 52,49 60,46 L71,42 C74,41 77,39 77,36 L77,31 L57,31 Z"
+          fill="#fff" transform="skewX(-8)"/>
+
+    <!-- Soldier silhouette -->
+    <!-- Head -->
+    <ellipse cx="50" cy="26" rx="5" ry="5" fill="#fff"/>
+    <!-- Helmet brim -->
+    <rect x="44" y="24" width="11" height="2.5" rx="1" fill="#fff"/>
+    <!-- Torso -->
+    <path d="M46,31 L44,52 L56,52 L54,31 Z" fill="#fff"/>
+    <!-- Back leg -->
+    <path d="M44,52 L40,70 L46,70 L50,55 Z" fill="#fff"/>
+    <!-- Front leg (bent) -->
+    <path d="M54,52 L58,66 L64,66 L60,55 Z" fill="#fff"/>
+    <!-- Arm + rifle -->
+    <path d="M53,38 L74,34 L75,38 L54,42 Z" fill="#fff"/>
+    <!-- Rifle barrel -->
+    <rect x="72" y="33" width="16" height="3" rx="1" fill="#fff"/>
+  </g>
+</svg>

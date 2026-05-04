@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4fc3f7"/>
+      <stop offset="100%" style="stop-color:#1565c0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield/chevron shape -->
+  <path d="M10,8 L90,8 Q95,8 95,18 L60,88 Q50,98 40,88 L5,18 Q5,8 10,8 Z"
+        fill="url(#shieldGrad)"/>
+
+  <!-- Inner shield highlight -->
+  <path d="M18,14 L82,14 Q86,14 84,22 L56,80 Q50,88 44,80 L16,22 Q14,14 18,14 Z"
+        fill="none" stroke="#90caf9" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Ball (grey sphere) -->
+  <circle cx="73" cy="22" r="13" fill="#b0bec5"/>
+  <circle cx="73" cy="22" r="13" fill="none" stroke="#78909c" stroke-width="1"/>
+  <!-- Ball shine -->
+  <ellipse cx="68" cy="17" rx="5" ry="3" fill="#eceff1" opacity="0.7"/>
+
+  <!-- Orbital swoosh around ball -->
+  <ellipse cx="73" cy="22" rx="20" ry="7" fill="none" stroke="#fff" stroke-width="2"
+           stroke-dasharray="30 10" transform="rotate(-30 73 22)" opacity="0.8"/>
+
+  <!-- Car body (simplified octane, flying diagonally) -->
+  <g transform="rotate(-25 50 52)">
+    <!-- Main body -->
+    <path d="M28,54 L62,54 L68,46 L58,42 L34,42 L24,46 Z" fill="#fff"/>
+    <!-- Windshield -->
+    <path d="M38,42 L54,42 L58,46 L36,46 Z" fill="#90caf9"/>
+    <!-- Front bumper -->
+    <path d="M62,54 L68,52 L68,46 L62,47 Z" fill="#e0e0e0"/>
+    <!-- Rear -->
+    <path d="M28,54 L22,52 L22,46 L28,47 Z" fill="#e0e0e0"/>
+    <!-- Wheels -->
+    <circle cx="34" cy="56" r="5" fill="#37474f"/>
+    <circle cx="34" cy="56" r="3" fill="#607d8b"/>
+    <circle cx="56" cy="56" r="5" fill="#37474f"/>
+    <circle cx="56" cy="56" r="3" fill="#607d8b"/>
+    <!-- Boost flame -->
+    <path d="M22,48 L14,52 L20,50 L12,55 L22,52 Z" fill="#ff6f00" opacity="0.9"/>
+    <path d="M22,50 L10,53 L22,51 Z" fill="#ffcc02" opacity="0.8"/>
+  </g>
+</svg>

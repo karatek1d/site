@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EsporTal — Агрегатор расписания киберспортивных турниров</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+
+    <nav class="top-nav" id="top-nav"></nav>
+
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+    </div>
+  </div>
+</header>
+
+<!-- GAME TABS -->
+<div class="game-tabs-bar">
+  <div class="game-tabs-inner" id="game-tabs"></div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🔥 Трендовые игры</div>
+      <a class="sidebar-nav-item" href="tournaments.html?game=cs2">
+        <span class="icon"><img src="/img/games/cs2.png" height="14" style="vertical-align:middle;object-fit:contain;" alt="CS2"></span>Counter-Strike 2
+        <span class="sidebar-badge blue">5</span>
+      </a>
+      <a class="sidebar-nav-item" href="tournaments.html?game=dota2">
+        <span class="icon"><img src="https://cdn.simpleicons.org/dota2/c22a2a" height="14" style="vertical-align:middle;object-fit:contain;" alt="Dota 2"></span>Dota 2
+        <span class="sidebar-badge blue">3</span>
+      </a>
+      <a class="sidebar-nav-item" href="tournaments.html?game=lol">
+        <span class="icon"><img src="https://cdn.simpleicons.org/leagueoflegends/c89b3c" height="14" style="vertical-align:middle;object-fit:contain;" alt="League of Legends"></span>League of Legends
+        <span class="sidebar-badge blue">2</span>
+      </a>
+      <a class="sidebar-nav-item" href="tournaments.html?game=valorant">
+        <span class="icon"><img src="https://cdn.simpleicons.org/valorant/ff4655" height="14" style="vertical-align:middle;object-fit:contain;" alt="Valorant"></span>Valorant
+        <span class="sidebar-badge blue">2</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- SOURCE BANNER -->
+    <div id="source-banner" class="alert alert-warning" style="display:none"></div>
+
+    <!-- FEATURED TOURNAMENTS -->
+    <div class="section-header">
+      <div class="section-title">Главные турниры</div>
+      <a href="tournaments.html" class="section-link">Все турниры →</a>
+    </div>
+    <div class="featured-grid" id="featured-tournaments"></div>
+
+    <!-- LIVE & UPCOMING MATCHES -->
+    <div class="matches-section">
+      <div class="section-header">
+        <div class="section-title">Матчи сегодня</div>
+        <a href="schedule.html" class="section-link">Полное расписание →</a>
+      </div>
+
+      <!-- Tabs: Live / Upcoming / Completed -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterMatches('all')">Все матчи</button>
+        <button class="tab-btn" onclick="filterMatches('live')">🔴 Live</button>
+        <button class="tab-btn" onclick="filterMatches('upcoming')">Предстоящие</button>
+      </div>
+
+      <div id="matches-list"></div>
+    </div>
+
+    <!-- ONGOING TOURNAMENTS TABLE -->
+    <div class="section-header">
+      <div class="section-title">Идущие турниры</div>
+      <a href="tournaments.html?status=live" class="section-link">Смотреть все →</a>
+    </div>
+    <div style="margin-bottom:24px" id="ongoing-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Турнир</th>
+            <th>Игра</th>
+            <th>Призовой фонд</th>
+            <th>Команды</th>
+            <th>Даты</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody id="ongoing-table"></tbody>
+      </table>
+    </div>
+
+    <!-- UPCOMING SECTION -->
+    <div class="section-header">
+      <div class="section-title">Предстоящие турниры</div>
+      <a href="tournaments.html?status=upcoming" class="section-link">Смотреть все →</a>
+    </div>
+    <div class="tournaments-grid" id="upcoming-grid"></div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📅 Ближайшие крупные турниры</div>
+      <div id="widget-upcoming"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🏅 Рейтинг команд</div>
+      <div id="widget-leaderboard"></div>
+      <div style="padding:10px 14px;border-top:1px solid var(--border)">
+        <a href="teams.html" style="font-size:12px;color:var(--text-secondary)">Полный рейтинг →</a>
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📊 Статистика платформы</div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">12</div>
+          <div style="font-size:11px;color:var(--text-secondary)">Активных турниров</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">48</div>
+          <div style="font-size:11px;color:var(--text-secondary)">Матчей на неделе</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">120</div>
+          <div style="font-size:11px;color:var(--text-secondary)">Команд</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">9</div>
+          <div style="font-size:11px;color:var(--text-secondary)">Игр</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров. Следи за всеми матчами любимых игр в одном месте.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Игры</div>
+      <div class="footer-links">
+        <a href="tournaments.html?game=cs2">Counter-Strike 2</a>
+        <a href="tournaments.html?game=dota2">Dota 2</a>
+        <a href="tournaments.html?game=lol">League of Legends</a>
+        <a href="tournaments.html?game=valorant">Valorant</a>
+        <a href="tournaments.html?game=rl">Rocket League</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">О проекте</div>
+      <div class="footer-links">
+        <a href="#">О нас</a>
+        <a href="#">API</a>
+        <a href="#">Контакты</a>
+        <a href="#">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EsporTal — Дипломный проект</span>
+    <span>Разработка сервиса агрегации и синхронизации расписания киберспортивных турниров</span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('home');
+  initTopNav('home');
+
+  // Показываем скелетон сразу
+  renderSkeleton('featured-tournaments', 4, 'card');
+  renderSkeleton('matches-list', 5, 'row');
+  renderSkeleton('ongoing-table-wrap', 3, 'row');
+  renderSkeleton('upcoming-grid', 6, 'card');
+
+  async function loadPage() {
+    // Параллельная загрузка
+    const [allTournaments, matches] = await Promise.all([
+      fetchTournaments(),
+      fetchMatches(null, 2)
+    ]);
+
+    // Featured (live + S-tier)
+    renderFeaturedLive(allTournaments);
+
+    // Матчи
+    renderMatchesList(matches);
+
+    // Идущие турниры
+    renderOngoingTable(allTournaments.filter(t => t.status === 'live'));
+
+    // Предстоящие
+    renderUpcomingGrid(allTournaments.filter(t => t.status === 'upcoming'));
+
+    // Sidebar
+    renderSidebarRight();
+
+    // Обновляем счётчики в виджете статистики
+    const live = allTournaments.filter(t => t.status === 'live').length;
+    document.querySelectorAll('.stat-live-count').forEach(el => el.textContent = live);
+  }
+
+  loadPage();
+
+  function filterMatches(type) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    const items = document.querySelectorAll('.match-card');
+    items.forEach(item => {
+      if (type === 'all') { item.style.display = ''; return; }
+      const isLive = item.querySelector('.match-time.live');
+      if (type === 'live') item.style.display = isLive ? '' : 'none';
+      else item.style.display = isLive ? 'none' : '';
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Турнир — EsporTal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .breadcrumb { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); margin-bottom:16px; }
+    .breadcrumb a { color:var(--text-secondary); }
+    .breadcrumb a:hover { color:var(--accent); }
+    .breadcrumb span { color:var(--text-secondary); }
+
+    .key-facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+    .key-fact {
+      background: var(--bg-card);
+      padding: 12px 16px;
+    }
+    .key-fact-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 5px;
+    }
+    .key-fact-value {
+      font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3;
+    }
+    .tournament-desc-text {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      line-height: 1.8;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .prize-distribution {
+      padding: 14px;
+    }
+    .prize-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .prize-row:last-child { border-bottom: none; }
+    .prize-place { color: var(--text-secondary); font-weight: 600; width: 80px; }
+    .prize-team { flex:1; color: var(--text-primary); }
+    .prize-amount { color: var(--accent); font-weight: 700; }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    .match-result-row {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      gap: 16px;
+    }
+    .match-result-teams {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .result-team { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; }
+    .match-team-score {
+      font-size:16px;
+      font-weight:800;
+      min-width:24px;
+      text-align:center;
+      color:var(--text-primary);
+    }
+    .match-team-score.live { color:var(--red); }
+    .result-meta { font-size:11px; color:var(--text-secondary); min-width:100px; text-align:right; flex-shrink:0; }
+    .winner-team { color:var(--accent); }
+    .winner-team .match-team-score { color:var(--accent); }
+
+    /* ── Double Elimination Bracket ───────────────────── */
+    .de-outer { display:flex; flex-direction:column; gap:0; }
+    .de-section-label {
+      font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.8px; padding:8px 10px 4px; margin-bottom:2px;
+    }
+    .de-section-label.ub {
+      color:#4fc3f7; border-left:3px solid #4fc3f7;
+    }
+    .de-section-label.lb {
+      color:#f5a623; border-left:3px solid #f5a623;
+    }
+    .de-separator {
+      display:flex; align-items:center; gap:10px; padding:10px 0; margin:4px 0;
+    }
+    .de-sep-line { flex:1; height:1px; background:var(--border); }
+    .de-sep-text {
+      font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1px; color:var(--text-muted); white-space:nowrap; padding:0 6px;
+    }
+    /* Grand Final column highlight */
+    .de-gf-round .bracket-round-title {
+      color:var(--accent) !important; border-bottom-color:var(--accent);
+    }
+    .de-gf-round .bracket-match {
+      border-color:var(--accent);
+      box-shadow:0 0 18px rgba(245,166,35,0.18);
+    }
+    /* LB round titles */
+    .de-lb-round .bracket-round-title { color:#f5a623; }
+    /* LB connector color */
+    .de-lb-conn .bracket-conn-pair::after { background:#3a2800; }
+    /* GF drop-connector (LB Final → GF arrow) */
+    .de-gf-drop {
+      display:flex; flex-direction:column; justify-content:center;
+      align-items:center; width:38px; flex-shrink:0;
+    }
+    .de-gf-drop-inner {
+      display:flex; flex-direction:column; align-items:center;
+      gap:2px; color:var(--accent); font-size:9px; font-weight:700;
+      letter-spacing:0.5px; white-space:nowrap;
+    }
+    .de-gf-drop-line {
+      width:2px; flex:1; min-height:8px;
+      background:linear-gradient(to top, var(--accent), transparent);
+    }
+    .de-gf-drop-arrow { font-size:12px; line-height:1; }
+  </style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <nav class="top-nav" id="top-nav"></nav>
+    <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+  </div>
+</header>
+
+<div class="game-tabs-bar">
+  <div class="game-tabs-inner" id="game-tabs"></div>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+    <div class="sidebar-widget" id="tournament-info-widget">
+      <div class="sidebar-widget-title">ℹ️ О турнире</div>
+      <table class="info-table" id="info-table"></table>
+    </div>
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">💰 Призовые</div>
+      <div class="prize-distribution" id="prize-distribution"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="breadcrumb">
+      <a href="index.html">Главная</a>
+      <span>›</span>
+      <a href="tournaments.html">Турниры</a>
+      <span>›</span>
+      <span id="breadcrumb-name">...</span>
+    </div>
+
+    <!-- TOURNAMENT HERO -->
+    <div class="tournament-hero" id="tournament-hero"></div>
+
+    <!-- CONTENT TABS -->
+    <div class="tabs" id="content-tabs">
+      <button class="tab-btn active" data-tab="overview">Обзор</button>
+      <button class="tab-btn" data-tab="bracket">Сетка</button>
+      <button class="tab-btn" data-tab="matches">Матчи</button>
+      <button class="tab-btn" data-tab="participants">Участники</button>
+      <button class="tab-btn" data-tab="standings">Таблица</button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="sidebar-widget" style="margin-bottom:16px;overflow:hidden">
+        <div class="key-facts-grid" id="key-facts-grid"></div>
+        <div class="tournament-desc-text" id="tournament-description"></div>
+      </div>
+
+      <div class="section-header"><div class="section-title">Расписание матчей</div></div>
+      <div id="overview-matches"></div>
+    </div>
+
+    <!-- BRACKET TAB -->
+    <div class="tab-content" id="tab-bracket">
+      <div class="section-header">
+        <div class="section-title">Сетка плей-офф</div>
+      </div>
+      <div class="sidebar-widget">
+        <div class="bracket-wrapper" id="bracket-wrapper">
+          <div class="bracket-scaler" id="bracket-scaler">
+            <div class="bracket" id="bracket-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHES TAB -->
+    <div class="tab-content" id="tab-matches">
+      <div class="section-header">
+        <div class="section-title">Все матчи</div>
+      </div>
+      <div id="all-matches"></div>
+    </div>
+
+    <!-- PARTICIPANTS TAB -->
+    <div class="tab-content" id="tab-participants">
+      <div class="section-header">
+        <div class="section-title">Участники</div>
+      </div>
+      <div class="sidebar-widget">
+        <div class="participants-grid" id="participants-grid"></div>
+      </div>
+    </div>
+
+    <!-- STANDINGS TAB -->
+    <div class="tab-content" id="tab-standings">
+      <div class="section-header">
+        <div class="section-title">Групповая таблица</div>
+      </div>
+      <div id="standings-container"></div>
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📅 Другие турниры</div>
+      <div id="other-tournaments"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🔔 Синхронизация</div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="alert('Турнир добавлен в Google Calendar!')">
+          📅 Google Calendar
+        </button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="alert('Скачивание .ics файла...')">
+          📥 Скачать .ics
+        </button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="alert('Уведомления включены!')">
+          🔔 Уведомления
+        </button>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Игры</div>
+      <div class="footer-links">
+        <a href="tournaments.html?game=cs2">Counter-Strike 2</a>
+        <a href="tournaments.html?game=dota2">Dota 2</a>
+        <a href="tournaments.html?game=lol">League of Legends</a>
+        <a href="tournaments.html?game=valorant">Valorant</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">О проекте</div>
+      <div class="footer-links">
+        <a href="#">О нас</a>
+        <a href="#">API</a>
+        <a href="#">Контакты</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EsporTal</span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('tournaments');
+  initTopNav('tournaments');
+
+  const params = new URLSearchParams(window.location.search);
+  const id = parseInt(params.get('id')) || 1;
+  const tournament = TOURNAMENTS.find(t => t.id === id) || TOURNAMENTS[0];
+  const game = GAMES.find(g => g.id === tournament.game);
+
+  document.title = `${tournament.name} — EsporTal`;
+  document.getElementById('breadcrumb-name').textContent = tournament.name;
+
+  // ---- HERO ----
+  const heroEl = document.getElementById('tournament-hero');
+  heroEl.innerHTML = `
+    <div class="tournament-hero-logo">${tournament.icon}</div>
+    <div class="tournament-hero-info">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        ${statusBadge(tournament.status)}
+        ${tierBadge(tournament.tier)}
+        <span style="font-size:12px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:5px;">${gameIconHtml(game, 16)} ${game?.name}</span>
+      </div>
+      <div class="tournament-hero-title">${tournament.name}</div>
+      <div class="tournament-hero-subtitle">${tournament.organizer} · ${tournament.location}</div>
+      <div class="tournament-hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">${tournament.prize}</div>
+          <div class="hero-stat-label">Призовой фонд</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">${tournament.teams}</div>
+          <div class="hero-stat-label">Команды</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">${formatDate(tournament.startDate)}</div>
+          <div class="hero-stat-label">Начало</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">${formatDate(tournament.endDate)}</div>
+          <div class="hero-stat-label">Конец</div>
+        </div>
+      </div>
+    </div>`;
+
+  // ---- INFO TABLE ----
+  const infoData = [
+    ['Игра', `<span style="display:inline-flex;align-items:center;gap:5px;">${gameIconHtml(game, 16)} ${game?.name}</span>`],
+    ['Тир', `Tier ${tournament.tier}`],
+    ['Формат', tournament.format],
+    ['Регион', tournament.region],
+    ['Организатор', tournament.organizer],
+    ['Местоположение', tournament.location],
+    ['Команд', tournament.teams],
+  ];
+  const infoTable = document.getElementById('info-table');
+  infoData.forEach(([label, val]) => {
+    infoTable.innerHTML += `<tr><th>${label}</th><td>${val}</td></tr>`;
+  });
+
+  // ---- PRIZE DISTRIBUTION ----
+  const prizeData = [
+    ['🥇 1 место', '—', Math.round(tournament.prizeNum * 0.4)],
+    ['🥈 2 место', '—', Math.round(tournament.prizeNum * 0.2)],
+    ['🥉 3–4 место', '—', Math.round(tournament.prizeNum * 0.1)],
+    ['5–8 место', '—', Math.round(tournament.prizeNum * 0.05)],
+  ];
+  const prizeEl = document.getElementById('prize-distribution');
+  prizeData.forEach(([place, team, amount]) => {
+    prizeEl.innerHTML += `<div class="prize-row">
+      <span class="prize-place">${place}</span>
+      <span class="prize-team">${team}</span>
+      <span class="prize-amount">${formatPrize(amount)}</span>
+    </div>`;
+  });
+
+  // ---- KEY FACTS + DESCRIPTION ----
+  const durationDays = Math.ceil((new Date(tournament.endDate) - new Date(tournament.startDate)) / (1000*60*60*24)) + 1;
+  const facts = [
+    { label: 'Формат',       value: tournament.format },
+    { label: 'Регион',       value: tournament.region },
+    { label: 'Команды',      value: `${tournament.teams} команд` },
+    { label: 'Организатор',  value: tournament.organizer },
+    { label: 'Длительность', value: `${durationDays} дней` },
+    { label: 'Тир',          value: `Tier ${tournament.tier}` },
+  ];
+  document.getElementById('key-facts-grid').innerHTML = facts.map(f =>
+    `<div class="key-fact">
+      <div class="key-fact-label">${f.label}</div>
+      <div class="key-fact-value">${f.value}</div>
+    </div>`).join('');
+  document.getElementById('tournament-description').textContent = tournament.description;
+
+  // ---- MATCH RENDER HELPER ----
+  function renderMatch(m, container) {
+    const div = document.createElement('div');
+    div.className = 'match-result-row';
+    const isLive = m.status === 'live';
+    const isUpcoming = m.status === 'upcoming';
+    const t1winner = !isUpcoming && !isLive && m.score1 > m.score2;
+    const t2winner = !isUpcoming && !isLive && m.score2 > m.score1;
+    const logo1 = TEAM_LOGOS[m.team1]
+      ? `<img src="${TEAM_LOGOS[m.team1]}" alt="${m.team1}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block">`
+      : (TEAMS.find(t=>t.name===m.team1)?.logo || '?');
+    const logo2 = TEAM_LOGOS[m.team2]
+      ? `<img src="${TEAM_LOGOS[m.team2]}" alt="${m.team2}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block">`
+      : (TEAMS.find(t=>t.name===m.team2)?.logo || '?');
+    const format = m.format || (tournament.format && tournament.format.includes('Bo5') ? 'Bo5' : 'Bo3');
+    div.innerHTML = `
+      <div class="match-result-teams">
+        <div class="result-team ${t1winner?'winner-team':''}">
+          <div class="match-team-logo">${logo1}</div>
+          <span style="flex:1">${m.team1}</span>
+          <span class="match-team-score ${isLive?'live':''}">${isUpcoming ? '—' : m.score1}</span>
+        </div>
+        <div class="result-team ${t2winner?'winner-team':''}">
+          <div class="match-team-logo">${logo2}</div>
+          <span style="flex:1">${m.team2}</span>
+          <span class="match-team-score ${isLive?'live':''}">${isUpcoming ? '—' : m.score2}</span>
+        </div>
+      </div>
+      <div class="result-meta">
+        <div class="match-format-badge" style="margin-bottom:4px">${format}</div>
+        <div>${m.date}</div>
+        <div style="margin-top:3px">${isLive?'<span class="live-dot" style="display:inline-block">LIVE</span>':m.time}</div>
+        ${m.stage ? `<div class="match-stage-label" style="margin-top:2px">${m.stage}</div>` : ''}
+      </div>`;
+    container.appendChild(div);
+  }
+
+  function renderMatchesGrouped(matches, container) {
+    if (!matches || !matches.length) {
+      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary)">
+        <div style="font-size:32px;margin-bottom:8px">📅</div>
+        <div>Матчи ещё не запланированы</div>
+      </div>`;
+      return;
+    }
+    // Group by date
+    const byDate = {};
+    matches.forEach(m => {
+      const key = m.date || 'TBD';
+      if (!byDate[key]) byDate[key] = [];
+      byDate[key].push(m);
+    });
+    // Sort: live first, then by date
+    const sorted = Object.entries(byDate).sort(([a], [b]) => {
+      if (a === 'TBD') return 1;
+      if (b === 'TBD') return -1;
+      return a.localeCompare(b);
+    });
+    sorted.forEach(([date, dayMatches]) => {
+      const hdr = document.createElement('div');
+      hdr.className = 'match-day-header';
+      hdr.textContent = date === 'TBD' ? 'Дата не указана' : formatDate(date);
+      container.appendChild(hdr);
+      dayMatches.forEach(m => renderMatch(m, container));
+    });
+  }
+
+  // ---- OVERVIEW MATCHES ----
+  const ovMatches = document.getElementById('overview-matches');
+  renderMatchesGrouped(TOURNAMENT_MATCHES[tournament.id] || tournament.matches, ovMatches);
+
+  // ---- BRACKET ----
+  // Логотип команды: сначала TOURNAMENT_PARTICIPANTS, потом TEAMS
+  function getTeamLogo(name) {
+    // Сначала статичное лого из маппинга
+    if (TEAM_LOGOS[name]) {
+      return `<img src="${TEAM_LOGOS[name]}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block">`;
+    }
+    // Потом запись из TEAMS (уже содержит <img> через _logo)
+    const t = TEAMS.find(t => t.name === name && t.game === tournament.game)
+           || TEAMS.find(t => t.name === name);
+    if (t) return t.logo;
+    return '❓';
+  }
+
+  // ── Shared bracket match renderer ─────────────────────────────────────
+  function renderBracketMatch(m, isFirst, isLast) {
+    const row = document.createElement('div');
+    row.className = 'bracket-match-row';
+    if (!isFirst) {
+      const lt = document.createElement('div');
+      lt.className = 'bracket-h-tail';
+      row.appendChild(lt);
+    }
+    const match = document.createElement('div');
+    match.className = 'bracket-match';
+    const s1 = m.s1 !== null ? m.s1 : '–';
+    const s2 = m.s2 !== null ? m.s2 : '–';
+    const logo1 = getTeamLogo(m.t1 || 'TBD');
+    const logo2 = getTeamLogo(m.t2 || 'TBD');
+    match.innerHTML = `
+      <div class="bracket-team ${m.w==='t1'?'winner':''}">
+        <div class="bracket-team-logo">${logo1}</div>
+        <span class="bracket-team-name">${m.t1 || 'TBD'}</span>
+        <span class="bracket-team-score">${m.s1!==null?s1:''}</span>
+      </div>
+      <div class="bracket-team ${m.w==='t2'?'winner':''}">
+        <div class="bracket-team-logo">${logo2}</div>
+        <span class="bracket-team-name">${m.t2 || 'TBD'}</span>
+        <span class="bracket-team-score">${m.s2!==null?s2:''}</span>
+      </div>`;
+    row.appendChild(match);
+    if (!isLast) {
+      const rt = document.createElement('div');
+      rt.className = 'bracket-h-tail';
+      row.appendChild(rt);
+    }
+    return row;
+  }
+
+  // ── Double Elimination renderer ───────────────────────────────────────
+  function renderDoubleElim(data) {
+    const scaler = document.getElementById('bracket-scaler');
+
+    // Build one horizontal bracket for UB + GF as last round
+    const ubAllRounds = [
+      ...data.upper,
+      { title: data.grandFinal.title, format: data.grandFinal.format,
+        matches: [data.grandFinal.match], isGF: true }
+    ];
+
+    function makeBracketSection(rounds, isLB) {
+      const bracket = document.createElement('div');
+      bracket.className = 'bracket';
+
+      rounds.forEach((round, roundIdx) => {
+        const isFirst = roundIdx === 0;
+        const isLast  = roundIdx === rounds.length - 1;
+
+        const col = document.createElement('div');
+        col.className = 'bracket-round' + (round.isGF ? ' de-gf-round' : '') + (isLB ? ' de-lb-round' : '');
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'bracket-round-title';
+        titleEl.innerHTML = `${round.title} <span style="color:var(--accent);font-size:10px;font-weight:600;text-transform:none;letter-spacing:0">${round.format}</span>`;
+        col.appendChild(titleEl);
+
+        const body = document.createElement('div');
+        body.className = 'bracket-round-body';
+        round.matches.forEach(m => body.appendChild(renderBracketMatch(m, isFirst, isLast)));
+        col.appendChild(body);
+        bracket.appendChild(col);
+
+        if (!isLast) {
+          const numPairs = Math.ceil(round.matches.length / 2);
+          const connCol = document.createElement('div');
+          connCol.className = 'bracket-conn-col' + (isLB ? ' de-lb-conn' : '');
+          const ph = document.createElement('div');
+          ph.className = 'bracket-conn-title-placeholder';
+          ph.textContent = 'x';
+          connCol.appendChild(ph);
+          const connBody = document.createElement('div');
+          connBody.className = 'bracket-conn-body';
+          for (let i = 0; i < numPairs; i++) {
+            connBody.appendChild(Object.assign(document.createElement('div'), { className: 'bracket-conn-pair' }));
+          }
+          connCol.appendChild(connBody);
+          bracket.appendChild(connCol);
+        } else if (isLB) {
+          // Arrow indicator after LB Final → Grand Final
+          const drop = document.createElement('div');
+          drop.className = 'de-gf-drop';
+          // phantom title to align
+          const ph2 = document.createElement('div');
+          ph2.className = 'bracket-conn-title-placeholder';
+          ph2.textContent = 'x';
+          drop.appendChild(ph2);
+          const dropBody = document.createElement('div');
+          dropBody.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+          dropBody.innerHTML = `
+            <div class="de-gf-drop-inner">
+              <div class="de-gf-drop-line"></div>
+              <div class="de-gf-drop-arrow">⬆</div>
+              <span>GF</span>
+            </div>`;
+          drop.appendChild(dropBody);
+          bracket.appendChild(drop);
+        }
+      });
+
+      return bracket;
+    }
+
+    const outer = document.createElement('div');
+    outer.className = 'de-outer';
+
+    // UB label
+    const ubLabel = document.createElement('div');
+    ubLabel.className = 'de-section-label ub';
+    ubLabel.textContent = '▲ Верхняя сетка (Upper Bracket)';
+    outer.appendChild(ubLabel);
+
+    outer.appendChild(makeBracketSection(ubAllRounds, false));
+
+    // Separator
+    const sep = document.createElement('div');
+    sep.className = 'de-separator';
+    sep.innerHTML = '<div class="de-sep-line"></div><span class="de-sep-text">▼ Нижняя сетка (Lower Bracket)</span><div class="de-sep-line"></div>';
+    outer.appendChild(sep);
+
+    // LB label
+    const lbLabel = document.createElement('div');
+    lbLabel.className = 'de-section-label lb';
+    lbLabel.textContent = '▼ Нижняя сетка';
+    outer.appendChild(lbLabel);
+
+    outer.appendChild(makeBracketSection(data.lower, true));
+
+    scaler.appendChild(outer);
+  }
+  // ──────────────────────────────────────────────────────────────────────
+
+  const bracketData = TOURNAMENT_BRACKETS[tournament.id];
+  const bracketEl = document.getElementById('bracket-content');
+
+  if (!bracketData) {
+    bracketEl.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-secondary)">
+      <div style="font-size:32px;margin-bottom:10px">🏆</div>
+      <div>Сетка плей-офф ещё не доступна</div>
+      <div style="font-size:12px;margin-top:6px;color:var(--text-muted)">${tournament.status === 'upcoming' ? 'Турнир ещё не начался' : 'Групповой этап продолжается'}</div>
+    </div>`;
+  } else if (bracketData.type === 'de') {
+    // Double Elimination bracket
+    renderDoubleElim(bracketData);
+    requestAnimationFrame(() => {
+      if (document.getElementById('tab-bracket').classList.contains('active')) fitBracket();
+    });
+  } else {
+    // Separate elimination, third-place and main rounds
+    const elimRound  = bracketData.find(r => r.eliminationRound);
+    const mainRounds = bracketData.filter(r => !r.thirdPlace && !r.eliminationRound);
+    const thirdRound = bracketData.find(r => r.thirdPlace);
+
+    // Render elimination round section above bracket
+    if (elimRound) {
+      const scaler = document.getElementById('bracket-scaler');
+      const section = document.createElement('div');
+      section.className = 'bracket-elim-section';
+
+      const header = document.createElement('div');
+      header.className = 'bracket-elim-header';
+      header.innerHTML = `<span class="bracket-elim-title">${elimRound.title}</span>`
+        + (elimRound.subtitle ? `<span class="bracket-elim-subtitle">${elimRound.subtitle}</span>` : '')
+        + `<span style="margin-left:auto;color:var(--accent);font-size:10px;font-weight:600">${elimRound.format}</span>`;
+      section.appendChild(header);
+
+      const grid = document.createElement('div');
+      grid.className = 'bracket-elim-grid';
+
+      const matchesCol = document.createElement('div');
+      matchesCol.className = 'bracket-elim-matches';
+
+      const arrowsCol = document.createElement('div');
+      arrowsCol.className = 'bracket-elim-arrows';
+
+      const winnersCol = document.createElement('div');
+      winnersCol.className = 'bracket-elim-winners';
+
+      elimRound.matches.forEach(m => {
+        const s1 = m.s1 !== null ? m.s1 : '–';
+        const s2 = m.s2 !== null ? m.s2 : '–';
+        const card = document.createElement('div');
+        card.className = 'bracket-elim-match';
+        card.innerHTML = `
+          <div class="bracket-team ${m.w==='t1'?'winner':''}">
+            <div class="bracket-team-logo">${getTeamLogo(m.t1)}</div>
+            <span class="bracket-team-name">${m.t1||'TBD'}</span>
+            <span class="bracket-team-score">${m.s1!==null?s1:''}</span>
+          </div>
+          <div class="bracket-team ${m.w==='t2'?'winner':''}">
+            <div class="bracket-team-logo">${getTeamLogo(m.t2)}</div>
+            <span class="bracket-team-name">${m.t2||'TBD'}</span>
+            <span class="bracket-team-score">${m.s2!==null?s2:''}</span>
+          </div>`;
+        matchesCol.appendChild(card);
+
+        const arrow = document.createElement('div');
+        arrow.className = 'bracket-elim-arrow';
+        arrow.textContent = '→';
+        arrowsCol.appendChild(arrow);
+
+        const winner = m.w === 't1' ? m.t1 : m.t2;
+        const wDiv = document.createElement('div');
+        wDiv.className = 'bracket-elim-winner';
+        wDiv.innerHTML = `<div class="bracket-team-logo">${getTeamLogo(winner)}</div><span class="bracket-elim-winner-name">${winner||'TBD'}</span>`;
+        winnersCol.appendChild(wDiv);
+      });
+
+      grid.appendChild(matchesCol);
+      grid.appendChild(arrowsCol);
+      grid.appendChild(winnersCol);
+      section.appendChild(grid);
+      scaler.insertBefore(section, bracketEl);
+    }
+
+    let finalColRef = null;
+
+    mainRounds.forEach((round, roundIdx) => {
+      const isFirst = roundIdx === 0;
+      const isLast  = roundIdx === mainRounds.length - 1;
+
+      const col = document.createElement('div');
+      col.className = 'bracket-round';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'bracket-round-title';
+      titleEl.innerHTML = `${round.title} <span style="color:var(--accent);font-size:10px;font-weight:600;text-transform:none;letter-spacing:0">${round.format}</span>`;
+      col.appendChild(titleEl);
+
+      const body = document.createElement('div');
+      body.className = 'bracket-round-body';
+
+      round.matches.forEach(m => body.appendChild(renderBracketMatch(m, isFirst, isLast)));
+
+      col.appendChild(body);
+      bracketEl.appendChild(col);
+      if (isLast) finalColRef = col;
+
+      if (!isLast) {
+        const numPairs = Math.ceil(round.matches.length / 2);
+        const connCol = document.createElement('div');
+        connCol.className = 'bracket-conn-col';
+        const ph = document.createElement('div');
+        ph.className = 'bracket-conn-title-placeholder';
+        ph.textContent = 'x';
+        connCol.appendChild(ph);
+        const connBody = document.createElement('div');
+        connBody.className = 'bracket-conn-body';
+        for (let i = 0; i < numPairs; i++) {
+          const pair = document.createElement('div');
+          pair.className = 'bracket-conn-pair';
+          connBody.appendChild(pair);
+        }
+        connCol.appendChild(connBody);
+        bracketEl.appendChild(connCol);
+      }
+    });
+
+    // 3rd place card below the bracket, aligned with the final column
+    if (thirdRound && finalColRef) {
+      const tpCard = document.createElement('div');
+      tpCard.className = 'bracket-third-place';
+      tpCard.style.marginTop = '8px';
+      const tpTitle = document.createElement('div');
+      tpTitle.className = 'bracket-third-place-title';
+      tpTitle.innerHTML = '<span style="font-size:13px;line-height:1">🥉</span> Матч за 3-е место <span style="color:var(--accent);font-size:10px;font-weight:600;text-transform:none;letter-spacing:0;margin-left:4px">' + thirdRound.format + '</span>';
+      tpCard.appendChild(tpTitle);
+      const m = thirdRound.matches[0];
+      const s1 = m.s1 !== null ? m.s1 : '–';
+      const s2 = m.s2 !== null ? m.s2 : '–';
+      const tpMatch = document.createElement('div');
+      tpMatch.innerHTML = `
+        <div class="bracket-team ${m.w==='t1'?'winner':''}">
+          <div class="bracket-team-logo">${getTeamLogo(m.t1)}</div>
+          <span class="bracket-team-name">${m.t1 || 'TBD'}</span>
+          <span class="bracket-team-score">${m.s1!==null?s1:''}</span>
+        </div>
+        <div class="bracket-team ${m.w==='t2'?'winner':''}">
+          <div class="bracket-team-logo">${getTeamLogo(m.t2)}</div>
+          <span class="bracket-team-name">${m.t2 || 'TBD'}</span>
+          <span class="bracket-team-score">${m.s2!==null?s2:''}</span>
+        </div>`;
+      tpCard.appendChild(tpMatch);
+      const bracketWrapper = bracketEl.parentElement;
+      bracketWrapper.appendChild(tpCard);
+      requestAnimationFrame(() => {
+        const offset = finalColRef.getBoundingClientRect().left
+                     - bracketEl.getBoundingClientRect().left
+                     + bracketWrapper.scrollLeft;
+        tpCard.style.marginLeft = offset + 'px';
+      });
+    }
+    // Fit bracket to viewport width if bracket tab is active on load
+    requestAnimationFrame(() => {
+      if (document.getElementById('tab-bracket').classList.contains('active')) fitBracket();
+    });
+  } // end if bracketData
+
+  // ---- ALL MATCHES ----
+  const allMatchesEl = document.getElementById('all-matches');
+  renderMatchesGrouped(TOURNAMENT_MATCHES[tournament.id] || tournament.matches, allMatchesEl);
+
+  // ---- PARTICIPANTS ----
+  const participantsEl = document.getElementById('participants-grid');
+  const rawParticipants = TOURNAMENT_PARTICIPANTS[tournament.id] || [];
+  const participantsList = rawParticipants.map(p => {
+    let logo;
+    if (TEAM_LOGOS[p.name]) {
+      logo = `<img src="${TEAM_LOGOS[p.name]}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block">`;
+    } else {
+      const found = TEAMS.find(t => t.name === p.name && t.game === tournament.game)
+                 || TEAMS.find(t => t.name === p.name);
+      logo = found ? found.logo : (p.logo || '?');
+    }
+    return { name: p.name, region: p.region, logo };
+  });
+
+  // Create shared tooltip element
+  const tooltip = document.createElement('div');
+  tooltip.className = 'roster-tooltip';
+  tooltip.id = 'roster-tooltip';
+  document.body.appendChild(tooltip);
+
+  let tooltipTimeout = null;
+  let activeCard = null;
+  let rafId = null;
+
+  function countryEmoji(code) {
+    return [...code.toUpperCase()].map(c => String.fromCodePoint(0x1F1A5 + c.charCodeAt(0))).join('');
+  }
+  function flagImg(countryCode, size = 20) {
+    const code = countryCode.toLowerCase();
+    const emoji = countryEmoji(countryCode);
+    return `<img src="https://flagcdn.com/w${size}/${code}.png" width="${size}" height="${Math.round(size * 0.67)}" alt="${countryCode}" title="${countryCode}" style="border-radius:2px;vertical-align:middle;flex-shrink:0" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${emoji}',title:'${countryCode}',style:'font-size:${Math.round(size * 0.9)}px;line-height:1;vertical-align:middle'}))">`;
+  }
+
+  // Ищет состав: сначала "Название|игра", потом просто "Название"
+  function getRoster(teamName) {
+    return (typeof TOURNAMENT_ROSTERS !== 'undefined' && TOURNAMENT_ROSTERS[teamName + '|' + tournament.id])
+        || ROSTERS[teamName + '|' + tournament.game]
+        || ROSTERS[teamName]
+        || [];
+  }
+
+  async function showTooltip(card, team) {
+    clearTimeout(tooltipTimeout);
+    // Capture position immediately before any async operations
+    const rect = card.getBoundingClientRect();
+    let roster = getRoster(team.name);
+    // Try live API if available
+    try {
+      const liveRoster = await fetchRoster(team.name, tournament.game);
+      if (liveRoster && liveRoster.length) roster = liveRoster;
+    } catch(e) { /* keep mock */ }
+
+    const uniqueCountries = [...new Set(roster.map(p => p.country))];
+    const nationalityFlags = uniqueCountries.map(c => flagImg(c, 16)).join(' ');
+
+    tooltip.innerHTML = `
+      <div class="roster-tooltip-header">
+        <div class="roster-tooltip-logo">${team.logo}</div>
+        <div>
+          <div class="roster-tooltip-team">${team.name}</div>
+          <div class="roster-tooltip-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span>${team.region}</span>
+            <span style="color:var(--border-light)">·</span>
+            ${nationalityFlags}
+          </div>
+        </div>
+      </div>
+      <div class="roster-tooltip-players">
+        ${roster.length ? roster.map(p => `
+          <div class="roster-player-row">
+            ${flagImg(p.country, 20)}
+            <div style="flex:1;min-width:0">
+              <div class="roster-player-nick">${p.nick}</div>
+              <div class="roster-player-name">${p.name}</div>
+            </div>
+            <span class="roster-player-role">${p.role}</span>
+          </div>`).join('') : `
+          <div style="padding:14px;text-align:center;color:var(--text-secondary);font-size:12px">
+            Состав не указан
+          </div>`}
+      </div>
+      <div class="roster-tooltip-footer">
+        👥 ${roster.length} игрок${roster.length === 1 ? '' : roster.length < 5 ? 'а' : 'ов'} · ${tournament.name}
+      </div>`;
+
+    activeCard = card;
+    tooltip.classList.add('visible');
+    startTrackingPosition();
+  }
+
+  function positionTooltip() {
+    if (!activeCard) return;
+    const rect = activeCard.getBoundingClientRect();
+    const ttW = 280;
+    const ttH = tooltip.offsetHeight || 260;
+    let left = rect.right + 10;
+    let top = rect.top;
+
+    if (left + ttW > window.innerWidth - 12) {
+      left = rect.left - ttW - 10;
+    }
+    const maxTop = window.innerHeight - ttH - 12;
+    if (top > maxTop) top = maxTop;
+    if (top < 8) top = 8;
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+  }
+
+  function startTrackingPosition() {
+    if (rafId) cancelAnimationFrame(rafId);
+    function loop() {
+      if (activeCard && tooltip.classList.contains('visible')) {
+        positionTooltip();
+        rafId = requestAnimationFrame(loop);
+      } else {
+        rafId = null;
+      }
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function hideTooltip() {
+    tooltipTimeout = setTimeout(() => {
+      tooltip.classList.remove('visible');
+      activeCard = null;
+    }, 120);
+  }
+
+  participantsList.forEach(p => {
+    const card = document.createElement('a');
+    card.href = `team.html?name=${encodeURIComponent(p.name)}&game=${tournament.game}`;
+    card.className = 'participant-card';
+    card.innerHTML = `
+      <div class="participant-logo">${p.logo}</div>
+      <div class="participant-name">${p.name}</div>
+      <div class="participant-region">${p.region}</div>`;
+
+    card.addEventListener('mouseenter', () => showTooltip(card, p));
+    card.addEventListener('mouseleave', hideTooltip);
+
+    participantsEl.appendChild(card);
+  });
+
+  // ---- STANDINGS ----
+  function buildStandingsTable(tableId, teams, qualifyCount, eliminateCount) {
+    const table = document.getElementById(tableId);
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th style="width:28px">#</th>
+          <th style="text-align:left">Команда</th>
+          <th title="Матчей сыграно">М</th>
+          <th title="Победы">В</th>
+          <th title="Поражения">П</th>
+          <th title="Карты: победы">КВ</th>
+          <th title="Карты: поражения">КП</th>
+          <th title="Разница карт">+/-</th>
+          <th title="Форма (последние 5 игр)" style="min-width:100px">Форма</th>
+          <th title="Очки" style="color:var(--accent)">Очки</th>
+        </tr>
+      </thead>`;
+    const tbody = document.createElement('tbody');
+    teams.forEach((t, i) => {
+      const tr = document.createElement('tr');
+      const posClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      let zoneClass = '';
+      if (qualifyCount && i < qualifyCount) zoneClass = 'zone-qualify';
+      else if (eliminateCount && i >= teams.length - eliminateCount) zoneClass = 'zone-eliminate';
+      else if (qualifyCount || eliminateCount) zoneClass = 'zone-middle';
+      tr.className = zoneClass;
+
+      const diff = (t.mw || 0) - (t.ml || 0);
+      const diffStr = diff > 0 ? `+${diff}` : `${diff}`;
+      const diffClass = diff > 0 ? 'standings-diff-pos' : diff < 0 ? 'standings-diff-neg' : 'standings-diff-neu';
+
+      const formDots = (t.form || []).map(r =>
+        `<span class="form-dot ${r==='W'?'win':r==='L'?'loss':'draw'}" title="${r==='W'?'Победа':r==='L'?'Поражение':'Ничья'}">${r}</span>`
+      ).join('');
+
+      const logo = getTeamLogo(t.name);
+      tr.innerHTML = `
+        <td class="standings-pos ${posClass}">${i+1}</td>
+        <td>
+          <div class="standings-team-cell">
+            <div class="standings-logo">${logo}</div>
+            ${t.name}
+          </div>
+        </td>
+        <td>${t.mp}</td>
+        <td class="standings-result w">${t.w}</td>
+        <td class="standings-result l">${t.l}</td>
+        <td style="color:var(--text-secondary)">${t.mw ?? '—'}</td>
+        <td style="color:var(--text-secondary)">${t.ml ?? '—'}</td>
+        <td class="${diffClass}">${t.mw != null ? diffStr : '—'}</td>
+        <td><div class="standings-form">${formDots || '<span style="color:var(--text-muted);font-size:11px">—</span>'}</div></td>
+        <td style="color:var(--accent);font-weight:700">${t.pts}</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    // Legend
+    if (qualifyCount || eliminateCount) {
+      const legend = document.createElement('div');
+      legend.style.cssText = 'padding:8px 12px;display:flex;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);';
+      const middleCount = teams.length - (qualifyCount || 0) - (eliminateCount || 0);
+      if (qualifyCount) legend.innerHTML += `<span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:3px;height:12px;background:var(--green);border-radius:2px"></span>Выход в плей-офф</span>`;
+      if (middleCount > 0 && qualifyCount && eliminateCount) legend.innerHTML += `<span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:3px;height:12px;background:var(--yellow);border-radius:2px"></span>Элиминейшн раунд</span>`;
+      if (eliminateCount) legend.innerHTML += `<span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:3px;height:12px;background:var(--red);border-radius:2px"></span>Выбывание</span>`;
+      table.parentElement.appendChild(legend);
+    }
+  }
+
+  // ---- BUILD STANDINGS FROM DATA ----
+  const standingsData = TOURNAMENT_STANDINGS[tournament.id];
+  const standingsContainer = document.getElementById('standings-container');
+
+  if (!standingsData) {
+    standingsContainer.innerHTML = `<div class="sidebar-widget"><div style="padding:40px;text-align:center;color:var(--text-secondary)">
+      <div style="font-size:32px;margin-bottom:10px">📊</div>
+      <div>Таблица ещё недоступна</div>
+      <div style="font-size:12px;margin-top:6px;color:var(--text-muted)">${tournament.status === 'upcoming' ? 'Турнир ещё не начался' : 'Данные обновляются'}</div>
+    </div></div>`;
+  } else {
+    standingsData.forEach((grp, gi) => {
+      const widget = document.createElement('div');
+      widget.className = 'sidebar-widget';
+      if (gi > 0) widget.style.marginTop = '12px';
+
+      const tableId = `standings-dyn-${tournament.id}-${gi}`;
+      widget.innerHTML = `
+        <div style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border)">${grp.group}</div>
+        <table class="standings-table" id="${tableId}"></table>`;
+      standingsContainer.appendChild(widget);
+
+      buildStandingsTable(tableId, grp.teams, grp.qualifyCount || 0, grp.eliminateCount || 0);
+    });
+  }
+
+  // ---- OTHER TOURNAMENTS ----
+  const otherEl = document.getElementById('other-tournaments');
+  TOURNAMENTS.filter(t => t.id !== tournament.id && t.game === tournament.game).slice(0, 4).forEach(t => {
+    const a = document.createElement('a');
+    a.href = `tournament.html?id=${t.id}`;
+    a.className = 'widget-list-item';
+    a.innerHTML = `
+      <span style="font-size:20px">${t.icon}</span>
+      <div class="widget-item-info">
+        <div class="widget-item-name">${t.shortName}</div>
+        <div class="widget-item-sub">${formatDate(t.startDate)}</div>
+      </div>
+      ${statusBadge(t.status)}`;
+    otherEl.appendChild(a);
+  });
+
+  // ---- TABS ----
+  function fitBracket() {
+    const wrapper = document.getElementById('bracket-wrapper');
+    const scaler = document.getElementById('bracket-scaler');
+    if (!wrapper || !scaler) return;
+    // Reset scale to measure natural size
+    scaler.style.transform = '';
+    wrapper.style.height = '';
+    const availW = wrapper.clientWidth - 32; // minus padding
+    const naturalW = scaler.scrollWidth;
+    const naturalH = scaler.scrollHeight;
+    if (naturalW > 0 && naturalW > availW) {
+      const scale = availW / naturalW;
+      scaler.style.transform = `scale(${scale})`;
+      wrapper.style.height = Math.ceil(naturalH * scale + 32) + 'px';
+    }
+  }
+
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      if (btn.dataset.tab === 'bracket') requestAnimationFrame(fitBracket);
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    if (document.getElementById('tab-bracket').classList.contains('active')) fitBracket();
+  });
+</script>
+</body>
+</html>

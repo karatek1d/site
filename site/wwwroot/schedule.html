@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расписание — EsporTal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .timezone-bar {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .timezone-bar strong { color: var(--text-primary); }
+    .game-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+    }
+    .legend-item.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">Espor<span>Tal</span></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Найти турнир, команду...">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <nav class="top-nav" id="top-nav"></nav>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <div id="auth-header-btns" style="display:flex;gap:8px;flex-shrink:0"></div>
+    </div>
+  </div>
+</header>
+
+<div class="game-tabs-bar">
+  <div class="game-tabs-inner" id="game-tabs"></div>
+</div>
+
+<div class="page-wrapper no-sidebar">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📌 Навигация</div>
+      <div id="sidebar-nav"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">🔴 Идут сейчас</div>
+      <div id="live-now"></div>
+    </div>
+
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-title">📅 Быстрый переход</div>
+      <div id="quick-dates"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div id="source-banner" class="alert alert-warning" style="display:none;margin-bottom:14px"></div>
+
+    <!-- CONTROLS -->
+    <div class="calendar-controls">
+      <div class="calendar-nav">
+        <button class="cal-btn" id="prev-btn">◀</button>
+        <div class="cal-month-label" id="month-label"></div>
+        <button class="cal-btn" id="next-btn">▶</button>
+      </div>
+      <button class="btn btn-ghost" id="today-btn">Сегодня</button>
+
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="month">Месяц</button>
+        <button class="view-btn" data-view="week">Неделя</button>
+        <button class="view-btn" data-view="list">Список</button>
+      </div>
+    </div>
+
+    <!-- TIMEZONE INFO -->
+    <div class="timezone-bar">
+      🕐 Время указано в вашем часовом поясе: <strong id="tz-label">UTC+3 (Москва)</strong>
+      <span style="margin-left:auto">Отображается: <strong id="events-shown">0</strong> событий</span>
+    </div>
+
+    <!-- GAME LEGEND -->
+    <div class="game-legend" id="game-legend"></div>
+
+    <!-- CALENDAR / LIST VIEW -->
+    <div id="calendar-view"></div>
+    <div id="list-view" style="display:none"></div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Espor<span>Tal</span></span>
+      </a>
+      <p>Сервис агрегации и синхронизации расписания киберспортивных турниров.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <div class="footer-links">
+        <a href="index.html">Главная</a>
+        <a href="tournaments.html">Турниры</a>
+        <a href="schedule.html">Расписание</a>
+        <a href="teams.html">Команды</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Игры</div>
+      <div class="footer-links">
+        <a href="tournaments.html?game=cs2">Counter-Strike 2</a>
+        <a href="tournaments.html?game=dota2">Dota 2</a>
+        <a href="tournaments.html?game=lol">League of Legends</a>
+        <a href="tournaments.html?game=valorant">Valorant</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Синхронизация</div>
+      <div class="footer-links">
+        <a href="#">Экспорт в Google Calendar</a>
+        <a href="#">Экспорт в iCal</a>
+        <a href="#">Подписка на RSS</a>
+        <a href="#">API расписания</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EsporTal</span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  initGameTabs();
+  initSidebarNav('schedule');
+  initTopNav('schedule');
+
+  // ---- State ----
+  const today = new Date();
+  let viewDate = new Date(today);
+  let currentView = 'month';
+  let activeGames = new Set(['all']);
+
+  let ALL_TOURNAMENTS = [...TOURNAMENTS];
+
+  // Build event map from tournaments array
+  function getEventsInRange(year, month) {
+    const events = [];
+    ALL_TOURNAMENTS.forEach(t => {
+      const start = new Date(t.startDate);
+      const end = new Date(t.endDate);
+      // span days between start and end
+      let cur = new Date(start);
+      while (cur <= end) {
+        if (cur.getFullYear() === year && cur.getMonth() === month) {
+          events.push({ ...t, date: new Date(cur), isStart: cur.getTime() === start.getTime(), isEnd: cur.getTime() === end.getTime() });
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+    });
+    return events;
+  }
+
+  // Game colors map
+  const gameColors = {
+    cs2: '#e6b800', dota2: '#e05555', lol: '#0bc4c4',
+    valorant: '#ff4655', rl: '#0099e6', sc2: '#1ca3ec',
+    apex: '#cd3333', ow2: '#f99e1a'
+  };
+
+  // Game legend
+  const legendEl = document.getElementById('game-legend');
+  GAMES.filter(g => g.id !== 'all').forEach(g => {
+    const span = document.createElement('span');
+    span.className = 'legend-item';
+    span.dataset.game = g.id;
+    span.innerHTML = `<span class="legend-dot" style="background:${g.color}"></span>${g.name}`;
+    span.addEventListener('click', () => {
+      if (activeGames.has('all')) activeGames.delete('all');
+      if (activeGames.has(g.id)) { activeGames.delete(g.id); span.classList.remove('active'); }
+      else { activeGames.add(g.id); span.classList.add('active'); }
+      if (activeGames.size === 0) { activeGames.add('all'); document.querySelectorAll('.legend-item').forEach(l => l.classList.remove('active')); }
+      renderCurrentView();
+    });
+    legendEl.appendChild(span);
+  });
+
+  const ALL_BTN = document.createElement('span');
+  ALL_BTN.className = 'legend-item active';
+  ALL_BTN.innerHTML = '🎮 Все игры';
+  ALL_BTN.style.order = '-1';
+  ALL_BTN.addEventListener('click', () => {
+    activeGames = new Set(['all']);
+    document.querySelectorAll('.legend-item').forEach(l => l.classList.remove('active'));
+    ALL_BTN.classList.add('active');
+    renderCurrentView();
+  });
+  legendEl.prepend(ALL_BTN);
+
+  function isGameVisible(gameId) {
+    return activeGames.has('all') || activeGames.has(gameId);
+  }
+
+  // ---- MONTH VIEW ----
+  function renderMonthView() {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
+
+    const events = getEventsInRange(year, month).filter(e => isGameVisible(e.game));
+    document.getElementById('events-shown').textContent = [...new Set(events.map(e => e.id))].length;
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    let startDow = firstDay.getDay(); // 0=Sun
+    startDow = startDow === 0 ? 6 : startDow - 1; // Monday=0
+
+    const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+    let html = `<div class="calendar-grid">
+      <div class="calendar-header">
+        ${dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('')}
+      </div>
+      <div class="calendar-body">`;
+
+    // Prev month filler
+    const prevLastDay = new Date(year, month, 0).getDate();
+    for (let i = startDow - 1; i >= 0; i--) {
+      html += `<div class="calendar-cell other-month"><div class="calendar-date">${prevLastDay - i}</div></div>`;
+    }
+
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+      const dayEvents = events.filter(e => e.date.getDate() === d && e.isStart);
+      const cell = `<div class="calendar-cell${isToday ? ' today' : ''}" onclick="showDayEvents(${year},${month},${d})">
+        <div class="calendar-date">${d}</div>
+        ${dayEvents.slice(0,3).map(e => `
+          <div class="calendar-event event-${e.game}" title="${e.name}" onclick="event.stopPropagation();location.href='tournament.html?id=${e.id}'">${e.icon} ${e.shortName}</div>
+        `).join('')}
+        ${dayEvents.length > 3 ? `<div style="font-size:10px;color:var(--text-secondary);padding:1px 3px">+${dayEvents.length-3} ещё</div>` : ''}
+      </div>`;
+      html += cell;
+    }
+
+    // Next month filler
+    const cellsUsed = startDow + lastDay.getDate();
+    const remaining = cellsUsed % 7 === 0 ? 0 : 7 - (cellsUsed % 7);
+    for (let i = 1; i <= remaining; i++) {
+      html += `<div class="calendar-cell other-month"><div class="calendar-date">${i}</div></div>`;
+    }
+
+    html += '</div></div>';
+    document.getElementById('calendar-view').innerHTML = html;
+  }
+
+  // ---- LIST VIEW ----
+  function renderListView() {
+    const listEl = document.getElementById('list-view');
+    listEl.innerHTML = '';
+
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
+
+    // Use SCHEDULE_DAYS for today + tomorrow, then build from tournaments
+    const allEvents = [];
+    ALL_TOURNAMENTS.filter(t => isGameVisible(t.game)).forEach(t => {
+      allEvents.push({ ...t, displayDate: t.startDate });
+    });
+
+    allEvents.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+
+    let total = 0;
+    SCHEDULE_DAYS.forEach(day => {
+      const filtered = day.events.filter(e => isGameVisible(e.game));
+      if (!filtered.length) return;
+      total += filtered.length;
+
+      const section = document.createElement('div');
+      section.className = 'schedule-day';
+      section.innerHTML = `<div class="schedule-day-header">
+        <span class="schedule-day-label">${day.label}</span>
+        <span class="schedule-day-count">${filtered.length} событий</span>
+      </div>`;
+
+      filtered.forEach(ev => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'schedule-item';
+        const game = GAMES.find(g => g.id === ev.game);
+        const statusHtml = ev.status === 'live'
+          ? '<span class="live-dot" style="margin-left:auto">LIVE</span>'
+          : '';
+        a.innerHTML = `
+          <div class="schedule-time ${ev.status === 'live' ? 'live-dot' : ''}" style="${ev.status==='live'?'color:var(--red);font-weight:700':''}">
+            ${ev.time}
+          </div>
+          <div class="schedule-game-icon" style="background:${game?.color||'#888'}22">${gameIconHtml(game, 20) || '🎮'}</div>
+          <div class="schedule-info">
+            <div class="schedule-tournament-name">${ev.name}</div>
+            <div class="schedule-stage">${ev.tournament} · ${ev.stage}</div>
+          </div>
+          ${statusHtml}
+          <div class="schedule-prize">${ev.prize}</div>`;
+        section.appendChild(a);
+      });
+
+      listEl.appendChild(section);
+    });
+
+    // Also show upcoming tournaments
+    const upcomingSection = document.createElement('div');
+    upcomingSection.className = 'schedule-day';
+    upcomingSection.innerHTML = `<div class="schedule-day-header">
+      <span class="schedule-day-label">Предстоящие турниры этого периода</span>
+      <span class="schedule-day-count">${ALL_TOURNAMENTS.filter(t => t.status === 'upcoming' && isGameVisible(t.game)).length} турниров</span>
+    </div>`;
+
+    ALL_TOURNAMENTS.filter(t => t.status === 'upcoming' && isGameVisible(t.game)).forEach(t => {
+      const a = document.createElement('a');
+      a.href = `tournament.html?id=${t.id}`;
+      a.className = 'schedule-item';
+      const game = GAMES.find(g => g.id === t.game);
+      a.innerHTML = `
+        <div class="schedule-time">${formatDate(t.startDate)}</div>
+        <div class="schedule-game-icon" style="background:${game?.color||'#888'}22">${t.icon}</div>
+        <div class="schedule-info">
+          <div class="schedule-tournament-name">${t.name}</div>
+          <div class="schedule-stage">${t.organizer} · ${t.location} · ${t.teams} команд</div>
+        </div>
+        <div class="schedule-prize">${t.prize}</div>`;
+      upcomingSection.appendChild(a);
+    });
+    listEl.appendChild(upcomingSection);
+
+    document.getElementById('events-shown').textContent = total;
+  }
+
+  function renderCurrentView() {
+    if (currentView === 'month' || currentView === 'week') {
+      document.getElementById('calendar-view').style.display = '';
+      document.getElementById('list-view').style.display = 'none';
+      renderMonthView();
+    } else {
+      document.getElementById('calendar-view').style.display = 'none';
+      document.getElementById('list-view').style.display = '';
+      renderListView();
+    }
+  }
+
+  // View toggle
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      renderCurrentView();
+    });
+  });
+
+  // Nav buttons
+  document.getElementById('prev-btn').onclick = () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    renderCurrentView();
+  };
+  document.getElementById('next-btn').onclick = () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    renderCurrentView();
+  };
+  document.getElementById('today-btn').onclick = () => {
+    viewDate = new Date(today);
+    renderCurrentView();
+  };
+
+  function showDayEvents(year, month, day) {
+    currentView = 'list';
+    document.querySelectorAll('.view-btn').forEach(b => { b.classList.toggle('active', b.dataset.view === 'list'); });
+    renderCurrentView();
+  }
+
+  // Live now sidebar
+  const liveNowEl = document.getElementById('live-now');
+  const liveTournaments = ALL_TOURNAMENTS.filter(t => t.status === 'live');
+  if (liveTournaments.length) {
+    liveTournaments.forEach(t => {
+      const game = GAMES.find(g => g.id === t.game);
+      const a = document.createElement('a');
+      a.href = `tournament.html?id=${t.id}`;
+      a.className = 'sidebar-nav-item';
+      a.innerHTML = `<span class="icon">${t.icon}</span><div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${t.shortName}</div>
+        <div style="font-size:10px;color:var(--text-secondary)">${game?.name}</div>
+      </div><span class="sidebar-badge live">LIVE</span>`;
+      liveNowEl.appendChild(a);
+    });
+  } else {
+    liveNowEl.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text-secondary)">Нет активных матчей</div>';
+  }
+
+  // Quick dates sidebar
+  const quickDatesEl = document.getElementById('quick-dates');
+  const quickMonths = [
+    { label: 'Март 2026', year: 2026, month: 2 },
+    { label: 'Апрель 2026', year: 2026, month: 3 },
+    { label: 'Май 2026', year: 2026, month: 4 },
+    { label: 'Июнь 2026', year: 2026, month: 5 },
+  ];
+  quickMonths.forEach((item, i) => {
+    const a = document.createElement('a');
+    const isCurrentMonth = today.getFullYear() === item.year && today.getMonth() === item.month;
+    a.className = 'sidebar-nav-item' + (isCurrentMonth ? ' active' : '');
+    a.href = '#';
+    a.innerHTML = `<span class="icon">📅</span>${item.label}`;
+    a.onclick = (e) => {
+      e.preventDefault();
+      viewDate = new Date(item.year, item.month, 1);
+      document.querySelectorAll('#quick-dates .sidebar-nav-item').forEach(el => el.classList.remove('active'));
+      a.classList.add('active');
+      renderCurrentView();
+    };
+    quickDatesEl.appendChild(a);
+  });
+
+  // Timezone
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('tz-label').textContent = tz || 'UTC+3 (Москва)';
+
+  renderCurrentView();
+
+  // Async load from API and refresh calendar
+  async function loadFromApi() {
+    try {
+      const tournaments = await fetchTournaments();
+      if (tournaments && tournaments.length) {
+        ALL_TOURNAMENTS = tournaments;
+        // Refresh live sidebar
+        liveNowEl.innerHTML = '';
+        const liveTours = ALL_TOURNAMENTS.filter(t => t.status === 'live');
+        if (liveTours.length) {
+          liveTours.forEach(t => {
+            const game = GAMES.find(g => g.id === t.game);
+            const a = document.createElement('a');
+            a.href = `tournament.html?id=${t.id}`;
+            a.className = 'sidebar-nav-item';
+            a.innerHTML = `<span class="icon">${t.icon||'🎮'}</span><div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${t.shortName||t.name}</div>
+              <div style="font-size:10px;color:var(--text-secondary)">${game?.name||t.game}</div>
+            </div><span class="sidebar-badge live">LIVE</span>`;
+            liveNowEl.appendChild(a);
+          });
+        } else {
+          liveNowEl.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text-secondary)">Нет активных турниров</div>';
+        }
+        renderCurrentView();
+      }
+    } catch(e) { /* keep mock data */ }
+  }
+  loadFromApi();
+</script>
+</body>
+</html>
